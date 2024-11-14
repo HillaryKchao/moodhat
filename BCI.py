@@ -7,7 +7,7 @@ from scipy.integrate import simps
 import scipy.signal as signal
 import argparse
 from pythonosc import dispatcher as disp, osc_server
-import pylsl
+# import pylsl
 # import mne
 
 class BCI:
@@ -91,15 +91,15 @@ class BCI:
 		TODO: broken, requires fixing.
 		''' 
 		# TODO: take code from Petal metrics and implement streaming with LSL
-		parser = argparse.ArgumentParser()
-		parser.add_argument('-n', '--stream_name', type=str, required=True,
-							default='PetalStream_eeg', help='the name of the LSL stream')
-		args = parser.parse_args()
-		print(f'looking for a stream with name {args.stream_name}...')
-		streams = pylsl.resolve_stream('name', args.stream_name)
-		if len(streams) == 0:
-			raise RuntimeError(f'Found no LSL streams with name {args.stream_name}')
-		inlet = pylsl.StreamInlet(streams[0])
+		# parser = argparse.ArgumentParser()
+		# parser.add_argument('-n', '--stream_name', type=str, required=True,
+		# 					default='PetalStream_eeg', help='the name of the LSL stream')
+		# args = parser.parse_args()
+		# print(f'looking for a stream with name {args.stream_name}...')
+		# streams = pylsl.resolve_stream('name', args.stream_name)
+		# if len(streams) == 0:
+		# 	raise RuntimeError(f'Found no LSL streams with name {args.stream_name}')
+		# inlet = pylsl.StreamInlet(streams[0])
 
 		...
 
@@ -133,7 +133,7 @@ class Pipe:
 				# loops through channels, gets the value for the corresponding channel and addes it to every self.store index
 				# i -> output store number; j -> input channel number
 				for j in range(self.no_of_input_channels): 
-					value = self.input_store[j].get()
+					value = self.input_store[j]#.get()
 					for i in range(self.no_of_outputs):
 						self.store[i][j].put(value)
 			except KeyboardInterrupt:

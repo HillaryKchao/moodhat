@@ -5,10 +5,11 @@ from matplotlib.animation import FuncAnimation
 from BCI import Pipe 
 
 x_axis_data = np.linspace(0, 20, 100)
-input_data = np.sin(x) + np.random.normal(scale=0.1, size=100) #random generated sample data
+input_data = np.sin(x_axis_data) + np.random.normal(scale=0.1, size=100) #random generated sample data
 
-pipe = Pipe()
-output_data = pipe.process(input_data) #do we have a function process()????
+pipe = Pipe(100, 100, input_data)
+pipe.action()
+output_data = pipe.store
 
 #making the graph!!
 fig, axes = plt.subplots(2)
@@ -25,7 +26,7 @@ axes[0].plot(x_axis_data, input_data, 'b-', label='Input Data')
 #Graph 2: output 
 axes[1].set_title("Output Data")
 axes[1].set_xlim(0, len(output_data))
-axes[1].set_ylim(output_data.min() - 0.2, output_data.max() + 0.2)
+axes[1].set_ylim(len(output_data) - 0.2, len(output_data) + 0.2)
 axes[1].legend()
 
 axes[1].plot(x_axis_data, output_data, 'r-', label='Output Data')
