@@ -2,7 +2,7 @@ import numpy as np
 from abc import ABC, abstractmethod
 import queue
 import threading
-from utils import generate_random_string, nanVal
+# from utils import generate_random_string, nanVal
 from scipy.integrate import simps
 import scipy.signal as signal
 import argparse
@@ -121,7 +121,7 @@ class Pipe:
 		self.no_of_outputs = no_of_outputs
 		self.no_of_input_channels = no_of_input_channels # if the prior stage has multiple pipes, it should be indexed before being passed into the arguments of the constructor
 		self.input_store = input_store
-		self.name = "PIPE_" + generate_random_string()
+		self.name = "PIPE_" # + generate_random_string()
 		# self.store -> stores the outputs for the pipe, maintains that the outputs of the pipe are used at the same time
 		# should be indexed manually (can be done by a synthesizer to automate this) to access the correct path in the pipe
 		self.store = [[queue.Queue() for j in range(no_of_input_channels)] for i in range(no_of_outputs)]
