@@ -133,7 +133,7 @@ class Pipe:
 				# loops through channels, gets the value for the corresponding channel and addes it to every self.store index
 				# i -> output store number; j -> input channel number
 				for j in range(self.no_of_input_channels): 
-					value = self.input_store[j]#.get()
+					value = self.input_store[j].get()
 					for i in range(self.no_of_outputs):
 						self.store[i][j].put(value)
 			except KeyboardInterrupt:
