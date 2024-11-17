@@ -103,12 +103,19 @@ class BCI:
 
 		...
 
+	def load_lsl_data(self, csv_path):
+		with open(csv_path, 'r') as csvfile:
+			data_array = np.loadtxt(csvfile, delimiter=',', skiprows=1, usecols=(0, 1, 2, 3, 4))
+		first_time = data_array[0][0]
+		for channel_data in data_array:
+			self.time_store.put(channel_data[0] - first_time)
+			for i in range(1, len(channel_data)):
+				self.store[i-1].put(channel_data[i])
+
 
 class Pipe:
 	'''
-	Connects one or more ProcessingBlocks together. Requires a knowledge of which pipes are connected together, the number of 
-		channels of data passed by each channel, and the number of targets the data has to go to. Pipes can be connected to multiple
-		piples to duplicate data being sent across (???)
+	Connects one or more ProcessingBlocks together. Requires a knowledge of which pipes are connected together, the number of channels of data passed by each channel, and the number of targets the data has to go to. Pipes can be connected to multiple piples to duplicate data being sent across (???)
 
 	Class variables:
 		- no_of_outputs: number of outputs data from each channel goes to, i.e. how many outgoing connections does the same value have to go to
@@ -132,10 +139,12 @@ class Pipe:
 			try:
 				# loops through channels, gets the value for the corresponding channel and addes it to every self.store index
 				# i -> output store number; j -> input channel number
-				for j in range(self.no_of_input_channels): 
-					value = self.input_store[j].get()
+				for j in range(self.no_of_input_channels):
+					value = self.input_store.get()
+					print(value)
 					for i in range(self.no_of_outputs):
 						self.store[i][j].put(value)
+				print("done")
 			except KeyboardInterrupt:
 				print(f"Closing {self.name} thread...")
 				break

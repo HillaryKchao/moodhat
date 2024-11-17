@@ -1,13 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+import queue
 
-from BCI import Pipe 
+from BCI import BCI, Pipe
 
-x_axis_data = np.linspace(0, 20, 100)
-input_data = np.sin(x_axis_data) + np.random.normal(scale=0.1, size=100) #random generated sample data
+bci = BCI()
+bci.load_lsl_data("EEG_recording_2024-11-16-22.34.56.csv")      # data from ria sitting (neutral)
+input_data = bci.store[3]       # TP10 channel
 
-pipe = Pipe(100, 100, input_data)
+pipe = Pipe(1, 1, input_data)
 pipe.action()
 output_data = pipe.store
 
@@ -15,21 +17,25 @@ output_data = pipe.store
 fig, axes = plt.subplots(2)
 fig.suptitle("Pipe Class Animation: Input vs. Output Data")
 
+x_axis_data = bci.time_store
+input_data_list, output_data_list, x_axis_data_list = [], [], []
+
+while not input_data.empty():
+    input_data_list.append(input_data.get())
+    output_data_list.append(output_data.get())
+    x_axis_data_list.append(x_axis_data.get())
+
 #Graph 1: input 
 axes[0].set_title("Input Data")
-axes[0].set_xlim(0, len(input_data))
-axes[0].set_ylim(input_data.min() - 0.2, input_data.max() + 0.2)
 axes[0].legend()
 
-axes[0].plot(x_axis_data, input_data, 'b-', label='Input Data') 
+axes[0].plot(x_axis_data_list, input_data_list, 'b-', label='Input Data') 
 
 #Graph 2: output 
 axes[1].set_title("Output Data")
-axes[1].set_xlim(0, len(output_data))
-axes[1].set_ylim(len(output_data) - 0.2, len(output_data) + 0.2)
 axes[1].legend()
 
-axes[1].plot(x_axis_data, output_data, 'r-', label='Output Data')
+axes[1].plot(x_axis_data, output_data_list, 'r-', label='Output Data')
 
 #Creating Animation
 # wtf is this
