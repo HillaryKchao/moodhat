@@ -109,9 +109,8 @@ class BCI:
 		first_time = data_array[0][0]
 		for channel_data in data_array:
 			self.time_store.put(channel_data[0] - first_time)
-			for i in range(1, len(channel_data)):
-				self.store[i-1].put(channel_data[i])
-
+			for i in range(self.no_of_channels):
+				self.store[i].put(channel_data[i+1])
 
 class Pipe:
 	'''
@@ -135,19 +134,16 @@ class Pipe:
 		
 
 	def action(self):
-		while True:
-			try:
-				# loops through channels, gets the value for the corresponding channel and addes it to every self.store index
-				# i -> output store number; j -> input channel number
+		try:
+			# loops through channels, gets the value for the corresponding channel and adds it to every self.store index
+			# i -> output store number; j -> input channel number
+			while self.input_store is not queue.Empty():
 				for j in range(self.no_of_input_channels):
 					value = self.input_store.get()
-					print(value)
 					for i in range(self.no_of_outputs):
 						self.store[i][j].put(value)
-				print("done")
-			except KeyboardInterrupt:
-				print(f"Closing {self.name} thread...")
-				break
+		except KeyboardInterrupt:
+			print(f"Closing {self.name} thread...")
 
 
 	def launch_server(self):
@@ -215,7 +211,7 @@ class MovingAverageFilter(ProcessingBlock):
 
 
 
-class PSD(ProcessingBlock): # TODO? should I have a separate type for blocks that have multiple outputs?
+class PSD(ProcessingBlock): 
 	"""
 	Computes the PSD of incoming data stream, and output the PSD per channel.
 	
