@@ -7,6 +7,7 @@ from scipy.integrate import simps
 import scipy.signal as signal
 import argparse
 from pythonosc import dispatcher as disp, osc_server
+import matplotlib.pyplot as plt
 # import pylsl
 # import mne
 
@@ -104,6 +105,9 @@ class BCI:
 		...
 
 	def load_lsl_data(self, csv_path):
+		'''
+		Loads data from the Excel file of data (collected by Muse using LSL streaming) into a list of queues.
+		'''
 		with open(csv_path, 'r') as csvfile:
 			data_array = np.loadtxt(csvfile, delimiter=',', skiprows=1, usecols=(0, 1, 2, 3, 4))
 		first_time = data_array[0][0]
@@ -231,8 +235,67 @@ class PSD(ProcessingBlock):
 		
 	"""
 	def __init__(self, no_of_input_channels, sampling_frequency, window_size, input_store):
-		...
+		assert len(input_store) == no_of_input_channels, "The input store must have one queue per channel."
+
+		self.no_of_input_channels = no_of_input_channels
+		self.sampling_frequency = sampling_frequency
+		self.window_size = window_size
+		self.input_store = input_store
+
 	
+	def compute_psd(self):
+		"""
+        Computes the Power Spectral Density (PSD) for each channel in the input store.
+        
+        :return: A list of PSDs for each channel. Each element is a tuple (frequencies, psd_values).
+        """
+		psd_results, channel_data = [], []
+
+		for i in range(self.no_of_input_channels):
+			while not self.input_store[i].empty():
+				channel_data.append(self.input_store[i].get())
+			if len(channel_data) < self.window_size:
+				print(f"Warning: Channel {i} has fewer data points than the window size. Skipping PSD calculation.")
+			
+			# apply windowing function (Hanning window by default)
+			print(self.window_size)
+			window = np.hanning(self.window_size)
+			signal_segment = np.array(channel_data[:self.window_size]) * window
+
+			# computer the FFT of the signal segment
+			fft_result = np.fft.fft(signal_segment)
+			fft_freq = np.fft.fftfreq(self.window_size, 1/self.sampling_frequency)  # frequency bins
+			
+			# compute PSD (magnitude squared of the FFT)
+			psd_values = np.abs(fft_result) ** 2
+			psd_values = psd_values[:self.window_size // 2]  # keep only positive frequencies
+
+			# only keep frequencies up to Nyquist frequency
+			freqs = fft_freq[:self.window_size // 2]
+
+			psd_results.append((freqs, psd_values))
+
+		return psd_results
+		
+	
+	def plot_psd(self):
+		"""
+        Plots the PSD for each channel.
+        """
+		psd_results = self.compute_psd()
+
+		plt.figure(figsize=(10, 6))
+        
+		for i, (freqs, psd_values) in enumerate(psd_results):
+			plt.semilogy(freqs, psd_values, label=f'Channel {i + 1}')
+
+		plt.title('Power Spectral Density for Each Channel')
+		plt.xlabel('Frequency (Hz)')
+		plt.ylabel('Power Spectral Density (dB/Hz)')
+		plt.legend()
+		plt.grid(True)
+		plt.show()
+
 		
 
 
