@@ -141,11 +141,24 @@ class Pipe:
 		try:
 			# loops through channels, gets the value for the corresponding channel and adds it to every self.store index
 			# i -> output store number; j -> input channel number
+		#TODO: run self.input_store through notch, low-pass, and high-pass (determine order) before storing each value
+			#sample for running through high pass filter
+			# HP_processsed = HighPassFilter(4, self.input_store, ....)
+			# #same for low pass, notch MAKE SURE TO CHECK ORDER
+			# LP_processsed = LowPassFilter(4, HP_processsed.store, ....)
+			# Notch_processed = NotchFilter(4, LP_processsed.store, ....) 
+			# while Notch_processed is not queue.Empty():
+			# 	for j in range(Notch_processed.no_of_input_channels):
+			# 		value = Notch_processed.input_store.get()
+			# 		for i in range(self.no_of_outputs):
+			# 			self.store[i][j].put(value)
+			
 			while self.input_store is not queue.Empty():
 				for j in range(self.no_of_input_channels):
 					value = self.input_store.get()
 					for i in range(self.no_of_outputs):
 						self.store[i][j].put(value)
+		
 		except KeyboardInterrupt:
 			print(f"Closing {self.name} thread...")
 
@@ -336,6 +349,7 @@ class Ratio(ProcessingBlock):
 
 
 class NotchFilter(ProcessingBlock):
+	#TODO: copy and paste notchFilter implementation into this file or import it
 	'''
 	Applies a Notch Filter on the data stream. Apply this on the input data (easiest to do this before applying any other processing blocks)
 
@@ -344,6 +358,10 @@ class NotchFilter(ProcessingBlock):
 	'''
 	def __init__(self, no_of_input_channels, input_store, notch_frequency, sampling_freqeuncy, quality_factor):
 		...
+
+
+
+#TODO: copy and paste high pass, low pass filter implementation into this file (same format as NotchFilter) or import them
 
 
 
