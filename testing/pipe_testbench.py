@@ -10,7 +10,7 @@ from pathlib import Path
 
 
 # Determine the directory containing the module
-relative_path = Path("../../BCI.py")
+relative_path = Path("../BCI.py")
 module_directory = relative_path.parent.resolve()
 
 # Add the directory to sys.path
@@ -24,16 +24,10 @@ firsttime = None # record the first timestamp during recording
 
 headset = BCI("MuseS") # ["TP9", "AF7", "AF8", "TP10"]
 headset_server, headset_server_thread = headset.launch_server()
+headset.load_lsl_data("../EEG_recording_2024-11-16-22.34.56.csv")
 
 pipe_obj = Pipe(2, headset.no_of_channels, headset.store)
 pipe_obj.launch_server()
-
-
-
-# # Start a thread to calculate the averages
-# average_thread = threading.Thread(target=calculate_averages)
-# average_thread.daemon = True
-# average_thread.start()
 
 # Real-time plotting setup
 
@@ -45,7 +39,6 @@ number_of_plots = pipe_obj.no_of_outputs
 number_of_lines = pipe_obj.no_of_input_channels
 list_of_labels = headset.channel_names
 
-# fig, axes_list = plt.subplots(number_of_plots, 1)
 axes_list = [None] * number_of_plots
 fig = plt.figure()
 ax1 = fig.add_subplot(1, 2, 1)
@@ -64,8 +57,6 @@ for i in range(number_of_plots):
         plot_matrix[i][j] = a
     axes_list[i].legend()
 
-# print("HI THIS IS A: ", type(plot_matrix[0][0]))
-
 def init():
     for i in range(number_of_plots):
         axes_list[i].set_xlim(0, 40)
@@ -73,8 +64,6 @@ def init():
         for j in range(number_of_lines):
             plot_matrix[i][j].set_data([], [])
     return [line for sublist in plot_matrix for line in sublist]
-    # return ln_tp9, ln_af7, ln_af8, ln_tp10 # does init() require a return when blit=True is not set?
-    
 
 def update(frame):
     global firsttime
@@ -92,22 +81,16 @@ def update(frame):
 
             axes_list[i].set_xlim(xdata[i][0], xdata[i][-1])
 
-            # print(f"AAA THIS IS : {len(xdata[i])}, {len(ydata_matrix[i][0])}")
-            
             for j in range(number_of_lines):
                 plot_matrix[i][j].set_data(xdata[i], ydata_matrix[i][j])
-    # print(store_empty(final_output_store[i]))
-        
         
 
-
-# Create a ThreadPoolExecutor to handle averaging in a separate thread
-# with ThreadPoolExecutor(max_workers=2) as executor:
-#     # Submit the averaging task to the executor
-#     executor.submit(calculate_averages)
-    
-ani = animation.FuncAnimation(fig, update, frames=range(1000), init_func=init, interval=1)
+ani = animation.FuncAnimation(fig, update, frames=range(5000), init_func=init, interval=1)
 plt.show()
+
+# saving animation to gif
+writer = animation.PillowWriter(fps=60, metadata=dict(artist='Me'), bitrate=100)
+ani.save('scatter.gif', writer=writer)
 
 try:
     while True:
