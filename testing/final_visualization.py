@@ -29,6 +29,15 @@ headset.load_lsl_data("../EEG_recording_2024-11-16-22.34.56.csv")
 pipe_obj = Pipe(2, headset.no_of_channels, headset.store)
 pipe_obj.launch_server()
 
+# creating processing blocks
+# notch_filter = NotchFilter(headset.no_of_channels, headset.store, 30, headset.sampling_rate, 1)
+# low_pass_filter = LowPassFilter(headset.no_of_channels, headset.store, 60, headset.sampling_rate)
+high_pass_filter = HighPassFilter(headset.no_of_channels, headset.store, 30, headset.sampling_rate)
+
+# pipe_obj.store = notch_filter.action()
+# pipe_obj.store = low_pass_filter.action()
+pipe_obj.store = high_pass_filter.action()
+
 # Real-time plotting setup
 
 def store_empty(store_list):
